@@ -1,0 +1,14 @@
+services:
+  api:
+    build: .
+    image: asset-tracking-api:local
+    container_name: asset-tracking-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - LOG_LEVEL=info
+    restart: unless-stopped
