@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
+import { api } from "@/lib/api-client";
+import { buildReconcileReport } from "@/lib/reconcile";
 
 export async function GET(): Promise<NextResponse> {
-  return NextResponse.json(
-    {
-      error: {
-        code: "not_implemented",
-        message:
-          "Build the reconciliation logic in app/api/reconcile/route.ts",
-        hint: "Pull from api.assets.list(), api.mock.facilities(), api.mock.finance(); compare; classify; return.",
-      },
-    },
-    { status: 501 },
-  );
+  const [assets, facilities, finance] = await Promise.all([
+    api.assets.list(),
+    api.mock.facilities(),
+    api.mock.finance(),
+  ]);
+
+  return NextResponse.json(buildReconcileReport(assets, facilities, finance));
 }

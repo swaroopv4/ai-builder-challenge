@@ -1,45 +1,67 @@
-# Asset tracking challenge
+# Asset Tracking Challenge
 
-A take-home challenge for software engineering interns. Candidates build a frontend on top of a small local backend that simulates the operational asset tracking system of a multi-site research lab.
+This fork builds the Next.js starter into a trust-repair workflow for lab asset tracking. The app keeps the hot scanner path fast for technicians and gives managers an exception-first view of cross-system drift.
 
-This is a **monorepo** with two apps you run side by side:
+## Run Locally
 
-- [`api/`](./api) — small Node/Fastify backend with a seeded SQLite database. Candidates don't modify it.
-- [`starter/`](./starter) — the Next.js starter that candidates fork. API client, types, base components, and stub pages already wired up.
-
-## Quick start
+Use Node 20+ and pnpm 9.15.9, matching `package.json`.
 
 ```bash
+corepack prepare pnpm@9.15.9 --activate
 pnpm install
-
-# Runs the API on :8080 and the starter on :3000
 pnpm dev
 ```
 
-Open http://localhost:3000.
-
-The starter reads `API_BASE_URL` and `API_TOKEN` from `starter/.env`. Copy `starter/.env.example` to `starter/.env` if you don't have one. Both are server-side only — the browser hits a proxy at `/api/upstream` that adds the token, so it never reaches the client.
-
-## What's in here
-
-| Document | For |
-|---|---|
-| [`docs/CHALLENGE.md`](./docs/CHALLENGE.md) | The candidate-facing brief |
-| [`docs/CONTEXT.md`](./docs/CONTEXT.md) | Background on the kind of system this is and why each piece exists. Optional. |
-| [`api/README.md`](./api/README.md) | How to run and test the API |
-| [`starter/README.md`](./starter/README.md) | How to run the starter |
-| [`starter/docs/api-reference.md`](./starter/docs/api-reference.md) | The API contract |
-| [`starter/docs/tips.md`](./starter/docs/tips.md) | Notes for candidates |
-| [`starter/docs/happy-path.md`](./starter/docs/happy-path.md) | 10-step smoke test for candidates |
-
-## Testing
+Environment variables for `starter/.env`:
 
 ```bash
-pnpm test          # all packages
-pnpm --filter @asset-tracking/api test
-pnpm --filter @asset-tracking/starter test
+API_BASE_URL=
+API_TOKEN=
 ```
 
-## License
+Do not prefix the token with `NEXT_PUBLIC_`. Browser requests go through the starter proxy or server route handlers so `API_TOKEN` stays server-side.
 
-MIT. See [LICENSE](./LICENSE).
+## What Was Built
+
+- Four mobile-first tech workflows: `/tech/receive`, `/tech/store`, `/tech/deploy`, and `/tech/transfer`.
+- Server-side store/deploy orchestration routes that write back to Facilities and Finance where required.
+- Location parsing for JSON, key-value, full rack slash paths, and storage-friendly slash paths.
+- Manager dashboard at `/manager` with morning summary, recent movement, filters, pagination, and a focused asset table.
+- Asset detail pages with current truth, readable event timeline, reconciliation context, and collapsed raw metadata.
+- Server-side three-way reconciliation at `/api/reconcile` and manager UI at `/manager/reconcile`.
+- Printable Code 128 labels at `/dev/barcodes`.
+
+## Three Calls I Nearly Made the Other Way
+
+1. Table-first manager page vs exception-first manager dashboard. Decision: exception-first because the manager has 60 seconds before standup.
+2. Raw reconciliation diff vs categorized reconciliation. Decision: categorized because managers need action, not raw mismatches.
+3. Camera-first scanner vs focused input first. Decision: focused keyboard/USB scanner path first because this is the hot path; camera remains an optional future fallback.
+
+## Pushback / Confusing Docs
+
+The brief says "three scan endpoints" in one place, but it also requires `/tech/transfer` and `starter/docs/api-reference.md` documents `POST /v1/scans/transfer`. I implemented transfer because the detailed requirement and API contract include it.
+
+## Intentionally Not Built
+
+- Real auth, signup, login, SSO, or password flows: the provided cookie RoleSwitcher is enough for the demo.
+- Offline queueing/sync and backend retry queues: partial downstream failures are shown honestly instead.
+- RMA UI: the state machine supports it, but the challenge excludes it.
+- Bulk import/export: not needed for the scan and reconciliation workflows.
+- Hardware driver/pairing integration: scanners type into the focused input.
+- Parent-child asset modeling and barcode-tag-as-asset lifecycle: acknowledged as real-world extensions, but outside this take-home.
+
+## Microcopy Note For Loom
+
+For incomplete deploy locations, the UI says: "Deploying puts an asset into service, so the rack unit is required. Scan or enter RU before continuing." I used that wording because it explains the operational reason, names the missing field in the tech's vocabulary, and gives the next physical action.
+
+## Testing Notes
+
+Unit tests were added for location parsing, rack formatting, reconciliation classification, and scan error copy. Manual happy-path coverage should be run after starting `pnpm dev` and resetting with:
+
+```bash
+curl.exe -X POST http://localhost:3000/api/upstream/reset
+```
+
+On macOS/Linux, `curl -X POST http://localhost:3000/api/upstream/reset` is equivalent. In PowerShell, use `curl.exe`; the `curl` alias can send a form content type that the Fastify API rejects.
+
+Known limitation: camera scanning was not added; the keyboard/USB scanner path is the stable default path.

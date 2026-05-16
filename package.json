@@ -4,15 +4,15 @@
   "private": true,
   "description": "Take-home challenge: lab equipment asset tracking, monorepo with hosted API and Next.js starter.",
   "license": "MIT",
-  "packageManager": "pnpm@11.1.1",
+  "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "dev": "pnpm -r --parallel dev",
-    "build": "pnpm -r build",
-    "test": "pnpm -r test",
-    "lint": "pnpm -r lint"
+    "dev": "corepack pnpm -r --parallel dev",
+    "build": "corepack pnpm -r build",
+    "test": "corepack pnpm -r test",
+    "lint": "corepack pnpm -r lint"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
