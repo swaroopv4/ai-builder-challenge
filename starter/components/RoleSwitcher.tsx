@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getRole, setRole, type Role } from "@/lib/auth";
+import { getCurrentUserId, getRole, setRole, type Role } from "@/lib/auth";
 
 export function RoleSwitcher() {
   const [role, setRoleState] = useState<Role>("tech");
@@ -19,6 +19,7 @@ export function RoleSwitcher() {
 
   const label =
     role === "tech" ? "Switch to manager view" : "Switch to tech view";
+  const userId = getCurrentUserId();
 
   return (
     <button
@@ -27,7 +28,7 @@ export function RoleSwitcher() {
       className="text-sm px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 min-h-[44px]"
       aria-label={label}
     >
-      <span className="text-gray-500 mr-2">role: {role}</span>
+      <span className="text-gray-500 mr-2">{role}: {userId}</span>
       <span className="font-medium">{label}</span>
     </button>
   );
